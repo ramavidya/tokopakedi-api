@@ -1,48 +1,46 @@
 package com.enigma.tokopakedi.controller;
 
-import com.enigma.tokopakedi.entity.Customer;
 import com.enigma.tokopakedi.entity.Product;
 import com.enigma.tokopakedi.repository.ProductRepository;
+import com.enigma.tokopakedi.service.ProductService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class ProductController {
 
     private final ProductRepository productRepository;
 
-    public ProductController(ProductRepository productRepository) {
+    private final ProductService productService;
+
+    public ProductController(ProductRepository productRepository, ProductService productService) {
         this.productRepository = productRepository;
+        this.productService = productService;
     }
     @PostMapping(path = "/products")
     public Product createNewProduct(@RequestBody Product product){
-        Product newProduct = productRepository.save(product);
-        return newProduct;
+        return productService.create(product);
     }
     @GetMapping(path = "/products")
     public List<Product> getAllProduct(){
-        List<Product> products = productRepository.findAll();
-        return products;
-    }
-    @DeleteMapping(path = "/products/{productId}")
-    public String delete(@PathVariable String productId){
-        Product product = new Product();
-        product.setId(productId);
-        productRepository.deleteById(productId);
-        return "Ok";
+        return productService.getAll();
     }
 
     @GetMapping(path = "/products/{productId}")
     public Product getProductById(@PathVariable("productId") String productId){
-        Product product = productRepository.findById(productId).orElseThrow();
-        return product;
+        return productService.getById(productId);
     }
 
-    @PutMapping(path = "/products/{productId}")
-    public Product update(@PathVariable("productId") String productId, @RequestBody Product product){
-        product.setId(productId);
-        productRepository.save(product);
-        return product;
+    @PutMapping(path = "/products")
+    public Product updateProduct(@RequestBody Product product){
+        return productService.update(product);
+    }
+
+    @DeleteMapping(path = "/products/{productId}")
+    public String deleteById(@PathVariable String productId){
+        productService.deleteById(productId);
+        return "Delete success";
     }
 }
