@@ -1,8 +1,12 @@
 package com.enigma.tokopakedi.service.impl;
 
 import com.enigma.tokopakedi.entity.Customer;
+import com.enigma.tokopakedi.model.SearchProductRequest;
 import com.enigma.tokopakedi.repository.CustomerRepository;
 import com.enigma.tokopakedi.service.CustomerService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,8 +35,14 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public List<Customer> getAll() {
-        return customerRepository.findAll();
+    public Page<Customer> getAll(Pageable pageable) {
+
+        return customerRepository.findAll(pageable);
+//        @Override
+//        public Page<Customer> getCustomersPaging(Integer pageNumber, Integer pageSize) {
+//            Pageable pageable = PageRequest.of(pageNumber, pageSize);
+//            return customerRepository.findAll(pageable);
+//        }
     }
 
     @Override
@@ -48,4 +58,15 @@ public class CustomerServiceImpl implements CustomerService {
         if (optionalCustomer.isEmpty()) throw new RuntimeException("customer not found");
         return customerRepository.save(customer);
     }
+
+
+
+    @Override
+    public List<Customer> searchByNameOrPhoneNumber(String name, String phoneNumber) {
+        return customerRepository.findByNameContainingOrPhoneNumberContaining(name, phoneNumber);
+    }
+
+
+
+
 }
