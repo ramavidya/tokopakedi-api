@@ -22,5 +22,5 @@ public class Product {
 
     private Integer stock;
 
-    private Integer price;
+    private Long price;
 }

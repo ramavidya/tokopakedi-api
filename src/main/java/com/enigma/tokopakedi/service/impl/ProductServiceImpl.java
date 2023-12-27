@@ -9,7 +9,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +29,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void deleteById(String productId) {
         Optional<Product> optionalProduct = productRepository.findById(productId);
-        if (optionalProduct.isEmpty()) throw new RuntimeException("customer not found");
+        if (optionalProduct.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND,"product not found");
         Product product = optionalProduct.get();
         productRepository.delete(product);
     }
@@ -49,13 +51,14 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Product getById(String productId) {
         Optional<Product> optionalProduct = productRepository.findById(productId);
-        if (optionalProduct.isEmpty()) throw new RuntimeException("Customer not found");
-        return optionalProduct.get();
+        if (optionalProduct.isPresent()) return optionalProduct.get();
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND,"product not found");
+
     }
     @Override
     public Product update(Product product) {
         Optional<Product> optionalProduct = productRepository.findById(product.getId());
-        if (optionalProduct.isEmpty()) throw new RuntimeException("customer not found");
+        if (optionalProduct.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND,"product not found");
         return productRepository.save(product);
     }
     @Override

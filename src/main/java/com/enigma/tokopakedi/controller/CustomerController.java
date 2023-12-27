@@ -2,11 +2,18 @@ package com.enigma.tokopakedi.controller;
 
 import com.enigma.tokopakedi.entity.Customer;
 import com.enigma.tokopakedi.entity.Product;
+import com.enigma.tokopakedi.model.PagingResponse;
+import com.enigma.tokopakedi.model.SearchCustomerRequest;
+import com.enigma.tokopakedi.model.SearchProductRequest;
+import com.enigma.tokopakedi.model.WebResponse;
 import com.enigma.tokopakedi.repository.CustomerRepository;
 import com.enigma.tokopakedi.service.CustomerService;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,29 +31,82 @@ public class CustomerController {
     }
 
     @PostMapping(path = "/customers")
-    public Customer createNewCustomer(@RequestBody Customer customer){
-        return customerService.create(customer);
+    public ResponseEntity<?> createNewCustomer(@RequestBody Customer customer){
+        Customer customer1 = customerService.create(customer);
+        WebResponse<Customer> customerWebResponse = WebResponse.<Customer>builder()
+                .status(HttpStatus.CREATED.getReasonPhrase())
+                .message("Create a customer success")
+                .data(customer1)
+                .build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(customerWebResponse);
+    }
+    @PostMapping(path = "/customers/bulk")
+    public ResponseEntity<?> createManyCustomers(@RequestBody List<Customer> customers){
+        List<Customer> customer = customerService.createManyCustomers(customers);
+        WebResponse<List<Customer>> customerWebResponse = WebResponse.<List<Customer>>builder()
+                .status(HttpStatus.CREATED.getReasonPhrase())
+                .message("Create  customers success")
+                .data(customer)
+                .build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(customerWebResponse);
+
     }
     @GetMapping(path = "/customers")
-    public Page<Customer> getAllCustomer(@RequestParam(defaultValue = "1") int page,
-                                         @RequestParam(defaultValue = "10") int size)
+    public ResponseEntity<?> getAllCustomer(@RequestParam(defaultValue = "1") Integer page,
+                                            @RequestParam(defaultValue = "10") Integer size,
+                                            @RequestParam(required = false) String name,
+                                            @RequestParam(required = false) String phoneNumber)
     {
-        if (page <= 0) page = 0;
-        Pageable pageable = PageRequest.of(page - 1,size);
-        return customerService.getAll(pageable);
+        SearchCustomerRequest request = SearchCustomerRequest.builder()
+                .name(name)
+                .phoneNumber(phoneNumber)
+                .page(page)
+                .size(size)
+                .build();
+        Page<Customer> customers = customerService.getAll(request);
+        PagingResponse pagingResponse = PagingResponse.builder()
+                .page(request.getPage())
+                .size(size)
+                .totalPages(customers.getTotalPages())
+                .totalElements(customers.getTotalElements())
+                .build();
+        WebResponse<List<Customer>> customerWebResponse = WebResponse.<List<Customer>>builder()
+                .message("successfully get customers")
+                .status(HttpStatus.OK.getReasonPhrase())
+                .paging(pagingResponse)
+                .data(customers.getContent())
+                .build();
+        return ResponseEntity.ok(customerWebResponse);
     }
     @GetMapping(path = "/customers/{customerId}")
-    public Customer getCustomerById(@PathVariable("customerId") String customerId){
-        return customerService.getById(customerId);
+    public ResponseEntity<?> getCustomerById(@PathVariable("customerId") String customerId){
+        Customer customer = customerService.getById(customerId);
+        WebResponse<Customer> customerWebResponse = WebResponse.<Customer>builder()
+                .status(HttpStatus.OK.getReasonPhrase())
+                .message("Id found")
+                .data(customer)
+                .build();
+        return ResponseEntity.ok(customerWebResponse);
     }
     @PutMapping(path = "/customers")
-    public Customer updateCustomer(@RequestBody Customer customer){
-        return customerService.update(customer);
+    public ResponseEntity<?> updateCustomer(@RequestBody Customer customer){
+        Customer customer1 = customerService.update(customer);
+        WebResponse<Customer> customerWebResponse = WebResponse.<Customer>builder()
+                .status(HttpStatus.OK.getReasonPhrase())
+                .message("updated")
+                .data(customer1)
+                .build();
+        return ResponseEntity.ok(customerWebResponse);
     }
     @DeleteMapping(path = "/customers/{customerId}")
-    public String deleteById(@PathVariable String customerId){
+    public ResponseEntity<?> deleteById(@PathVariable String customerId){
         customerService.deleteById(customerId);
-        return "Delete success";
+        WebResponse<String> webResponse = WebResponse.<String>builder()
+                .status(HttpStatus.OK.getReasonPhrase())
+                .message("Success")
+                .data("Deleted")
+                .build();
+        return ResponseEntity.ok(webResponse);
     }
 //    @GetMapping(path = "/customers/{pageNumber}/{pageSize}")
 //    public Page<Customer> customerPaging(@PathVariable int pageNumber, @PathVariable int pageSize){

@@ -2,7 +2,9 @@ package com.enigma.tokopakedi.controller;
 
 import com.enigma.tokopakedi.entity.Customer;
 import com.enigma.tokopakedi.entity.Product;
+import com.enigma.tokopakedi.model.PagingResponse;
 import com.enigma.tokopakedi.model.SearchProductRequest;
+import com.enigma.tokopakedi.model.WebResponse;
 import com.enigma.tokopakedi.repository.ProductRepository;
 import com.enigma.tokopakedi.service.ProductService;
 import org.springframework.data.domain.Page;
@@ -27,17 +29,27 @@ public class ProductController {
         this.productService = productService;
     }
     @PostMapping(path = "/products")
-    public ResponseEntity<Product> createNewProduct(@RequestBody Product product){
+    public ResponseEntity<WebResponse<Product>> createNewProduct(@RequestBody Product product){
         Product newProduct = productService.create(product);
-        return ResponseEntity.status(HttpStatus.CREATED).body(newProduct);
+        WebResponse<Product> response = WebResponse.<Product>builder()
+                .message("successfully create a product")
+                .status(HttpStatus.OK.getReasonPhrase())
+                .data(newProduct)
+                .build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
     @PostMapping(path = "/products/bulk")
-    public ResponseEntity<List<Product>> createBulk(@RequestBody List<Product> products){
+    public ResponseEntity<?> createBulk(@RequestBody List<Product> products){
         List<Product> bulk = productService.createBulk(products);
-        return ResponseEntity.status(HttpStatus.CREATED).body(bulk);
+        WebResponse<List<Product>> response = WebResponse.<List<Product>>builder()
+                .message("successfully create  products")
+                .status(HttpStatus.OK.getReasonPhrase())
+                .data(bulk)
+                .build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
     @GetMapping(path = "/products")
-    public ResponseEntity<Page<Product>> getAllProduct(
+    public ResponseEntity<?> getAllProduct(
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(required = false) String name,
@@ -51,27 +63,53 @@ public class ProductController {
                 .minPrice(minPrice)
                 .maxPrice(maxPrice)
                 .build();
-
-        Page<Product> all = productService.getAll(request);
-        return ResponseEntity.ok(all);
+        Page<Product> products = productService.getAll(request);
+        PagingResponse pagingResponse = PagingResponse.builder()
+                .page(request.getPage())
+                .size(size)
+                .totalPages(products.getTotalPages())
+                .totalElements(products.getTotalElements())
+                .build();
+        WebResponse<List<Product>> response = WebResponse.<List<Product>>builder()
+                .message("get all products success")
+                .status(HttpStatus.OK.getReasonPhrase())
+                .paging(pagingResponse)
+                .data(products.getContent())
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping(path = "/products/{productId}")
-    public ResponseEntity<Product> getProductById(@PathVariable("productId") String productId){
+    public ResponseEntity<?> getProductById(@PathVariable("productId") String productId){
         Product byId = productService.getById(productId);
-        return ResponseEntity.ok(byId);
+        WebResponse<Product> response = WebResponse.<Product>builder()
+                .message("successfully get a product")
+                .status(HttpStatus.OK.getReasonPhrase())
+                .data(byId)
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping(path = "/products")
-    public ResponseEntity<Product> updateProduct(@RequestBody Product product){
+    public ResponseEntity<?> updateProduct(@RequestBody Product product){
         Product updated = productService.update(product);
-        return ResponseEntity.ok(updated);
+        WebResponse<Product> response = WebResponse.<Product>builder()
+                .message("successfully update a product")
+                .status(HttpStatus.OK.getReasonPhrase())
+                .data(updated)
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping(path = "/products/{productId}")
-    public ResponseEntity<String> deleteById(@PathVariable String productId){
+    public ResponseEntity<?> deleteById(@PathVariable String productId){
         productService.deleteById(productId);
-        return ResponseEntity.ok("Ok");
+        WebResponse<String> response = WebResponse.<String>builder()
+                .message("successfully delete a product")
+                .status(HttpStatus.OK.getReasonPhrase())
+                .data("Deleted")
+                .build();
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping(path = "/products/search")
