@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -58,6 +59,7 @@ public class OrderController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('SUPER_ADMIN', 'ADMIN')")
     public ResponseEntity<?> getAllTransaction(@RequestParam(required = false, defaultValue = "1") Integer page,
                                                @RequestParam(required = false, defaultValue = "10") Integer size) {
         SearchOrderRequest request = SearchOrderRequest.builder()
@@ -72,17 +74,6 @@ public class OrderController {
                 .totalPages(orders.getTotalPages())
                 .totalElements(orders.getTotalElements())
                 .build();
-
-//        OrderDetailResponse orderDetail = OrderDetail.builder()
-//                .
-//                .build();
-//
-//        WebResponse<List<OrderResponse>> response = WebResponse.<List<OrderResponse>>builder()
-//                .status(HttpStatus.OK.getReasonPhrase())
-//                .message("successfully get all transaction")
-//                .data()
-//                .paging(pagingResponse)
-//                .build();
 
         WebResponse<List<Order>> response = WebResponse.<List<Order>>builder()
                 .status(HttpStatus.OK.getReasonPhrase())

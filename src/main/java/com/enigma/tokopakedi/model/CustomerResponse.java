@@ -1,16 +1,16 @@
-package com.enigma.tokopakedi.entity;
+package com.enigma.tokopakedi.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.*;
 
 @Setter
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "m_customer")
-@Entity
 @Builder
-public class Customer {
+public class CustomerResponse {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -21,7 +21,4 @@ public class Customer {
     private String address;
 
     private String phoneNumber;
-
-    @OneToOne
-    private UserCredential userCredential;
 }

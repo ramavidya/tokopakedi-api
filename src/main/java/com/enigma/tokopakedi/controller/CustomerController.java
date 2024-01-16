@@ -2,10 +2,7 @@ package com.enigma.tokopakedi.controller;
 
 import com.enigma.tokopakedi.entity.Customer;
 import com.enigma.tokopakedi.entity.Product;
-import com.enigma.tokopakedi.model.PagingResponse;
-import com.enigma.tokopakedi.model.SearchCustomerRequest;
-import com.enigma.tokopakedi.model.SearchProductRequest;
-import com.enigma.tokopakedi.model.WebResponse;
+import com.enigma.tokopakedi.model.*;
 import com.enigma.tokopakedi.repository.CustomerRepository;
 import com.enigma.tokopakedi.service.CustomerService;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -91,10 +88,16 @@ public class CustomerController {
     @PutMapping(path = "/customers")
     public ResponseEntity<?> updateCustomer(@RequestBody Customer customer){
         Customer customer1 = customerService.update(customer);
-        WebResponse<Customer> customerWebResponse = WebResponse.<Customer>builder()
+        CustomerResponse responseData = CustomerResponse.builder()
+                .id(customer1.getId())
+                .name(customer1.getName())
+                .address(customer1.getAddress())
+                .phoneNumber(customer1.getPhoneNumber())
+                .build();
+        WebResponse<CustomerResponse> customerWebResponse = WebResponse.<CustomerResponse>builder()
                 .status(HttpStatus.OK.getReasonPhrase())
                 .message("updated")
-                .data(customer1)
+                .data(responseData)
                 .build();
         return ResponseEntity.ok(customerWebResponse);
     }

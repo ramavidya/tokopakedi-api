@@ -112,18 +112,4 @@ public class ProductController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping(path = "/products/search")
-    public List<Product> productsSearchByNameAndPrice(@RequestParam(required = false)String name,
-                                                      @RequestParam(required = false)Integer minPrice,
-                                                      @RequestParam(required = false)Integer maxPrice){
-        return productService.getProductNameOrPriceRange(name, minPrice,maxPrice);
-    }
-    @GetMapping(path = "/products/searchPrice")
-    public List<Product> productsSearchByPrice(
-                                                      @RequestParam(required = false)Integer minPrice,
-                                                      @RequestParam(required = false)Integer maxPrice){
-        return productService.getProductByPriceRange(minPrice,maxPrice);
-    }
-
-
 }

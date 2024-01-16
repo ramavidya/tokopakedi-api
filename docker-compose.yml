@@ -1,0 +1,14 @@
+version: "3.8"
+volumes:
+  tokopakedi-volume:
+networks:
+  tokopakedi-network:
+
+services:
+  db:
+    container_name: tokopakedi-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=tokopakedi_db
+  backend:
+    container_name: tokopakedi-api
